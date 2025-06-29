@@ -18,15 +18,41 @@ device_id = "esp32-001"
 
 @app.get("/", response_class=HTMLResponse)
 async def home():
-    return f"""
+    return """
     <html>
-      <head><title>ESP32 Monitor</title></head>
+      <head>
+        <meta charset="UTF-8">
+        <title>ESP32 Monitor</title>
+        <style>
+          body { font-family: sans-serif; padding: 20px; }
+          .label { font-weight: bold; }
+        </style>
+      </head>
       <body>
-        <h1>✅ ESP32 is Online</h1>
-        <p><strong>Voltage:</strong> {voltage} V</p>
-        <p><strong>Status:</strong> {status}</p>
-        <p><strong>Device ID:</strong> {device_id}</p>
-        <p><strong>Time:</strong> {datetime.utcnow().isoformat()}</p>
+        <h2>📡 ESP32 Monitoring Dashboard</h2>
+        <p><span class="label">Voltage:</span> <span id="voltage">--</span> V</p>
+        <p><span class="label">Status:</span> <span id="status">--</span></p>
+        <p><span class="label">Device ID:</span> <span id="device_id">--</span></p>
+        <p><span class="label">Timestamp:</span> <span id="timestamp">--</span></p>
+
+        <script>
+          async function fetchData() {
+            try {
+              const res = await fetch("/data");
+              const data = await res.json();
+              document.getElementById("voltage").innerText = data.voltage;
+              document.getElementById("status").innerText = data.status;
+              document.getElementById("device_id").innerText = data.device_id;
+              document.getElementById("timestamp").innerText = new Date(data.timestamp).toLocaleTimeString();
+            } catch (e) {
+              console.error("Fetch error:", e);
+            }
+          }
+
+          // هر ثانیه یک بار داده جدید بگیر
+          setInterval(fetchData, 1000);
+          fetchData();  // بار اول فوری اجرا کن
+        </script>
       </body>
     </html>
     """
