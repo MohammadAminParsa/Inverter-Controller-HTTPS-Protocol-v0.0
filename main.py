@@ -1,8 +1,7 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
-import json
 
 app = FastAPI()
 
@@ -12,9 +11,25 @@ app.add_middleware(
     allow_methods=["*"], allow_headers=["*"]
 )
 
+# متغیرهای سراسری
 voltage = "0.000"
 status = "ON"
 device_id = "esp32-001"
+
+@app.get("/", response_class=HTMLResponse)
+async def home():
+    return f"""
+    <html>
+      <head><title>ESP32 Monitor</title></head>
+      <body>
+        <h1>✅ ESP32 is Online</h1>
+        <p><strong>Voltage:</strong> {voltage} V</p>
+        <p><strong>Status:</strong> {status}</p>
+        <p><strong>Device ID:</strong> {device_id}</p>
+        <p><strong>Time:</strong> {datetime.utcnow().isoformat()}</p>
+      </body>
+    </html>
+    """
 
 @app.post("/data")
 async def receive_data(req: Request):
@@ -49,8 +64,4 @@ async def update_status(req: Request):
     if s in ["ON", "OFF"]:
         status = s
         return {"message": f"Status set to {status}"}
-    return JSONResponse(status_code=400, content={"error": "Invalid status"})
-
-@app.get("/status")
-def get_status():
-    return {"status": status}
+    return
