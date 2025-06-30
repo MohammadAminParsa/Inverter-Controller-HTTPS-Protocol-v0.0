@@ -90,4 +90,6 @@ async def update_status(req: Request):
     if s in ["ON", "OFF"]:
         status = s
         return {"message": f"Status set to {status}"}
-    return
+    
+    return JSONResponse(status_code=400, content={"error": "Invalid status"})
+
