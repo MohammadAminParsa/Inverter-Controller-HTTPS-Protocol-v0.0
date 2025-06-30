@@ -45,7 +45,7 @@ async def home():
               document.getElementById("voltage").innerText = data.voltage;
               document.getElementById("status").innerText = data.status;
               document.getElementById("device_id").innerText = data.device_id;
-              document.getElementById("timestamp").innerText = new Date(data.timestamp).toLocaleTimeString();
+              document.getElementById("timestamp").innerText = new Date(data.timestamp).toLocaleString();
             } catch (e) {
               console.error("Fetch error:", e);
             }
