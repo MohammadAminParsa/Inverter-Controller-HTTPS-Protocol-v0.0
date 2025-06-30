@@ -15,6 +15,8 @@ app.add_middleware(
 voltage = "0.000"
 status = "ON"
 device_id = "esp32-001"
+last_data = {}
+
 
 @app.get("/", response_class=HTMLResponse)
 async def home():
@@ -59,28 +61,26 @@ async def home():
 
 @app.post("/data")
 async def receive_data(req: Request):
-    body = await req.json()
-    global voltage, status, device_id
-    device_id = body.get("device_id", "unknown")
-    voltage = body.get("voltage", "0.000")
-    status = body.get("status", status)
-    print(f"📥 Received: {body}")
+    json = await req.json()
+    print("📥 Received:", json)
+
+    # ذخیره داده‌ی آخر
+    global last_data
+    last_data = {
+        "device_id": json.get("device_id", "unknown"),
+        "voltage": json.get("voltage", "0.000"),
+        "status": json.get("status", "UNKNOWN"),
+        "timestamp": json.get("timestamp", datetime.utcnow().isoformat())
+    }
+
     return {
         "message": "Data received",
-        "voltage": voltage,
-        "status": status,
-        "device_id": device_id,
-        "timestamp": datetime.utcnow().isoformat()
+        **last_data
     }
 
 @app.get("/data")
 def get_data():
-    return {
-        "device_id": device_id,
-        "voltage": voltage,
-        "status": status,
-        "timestamp": datetime.utcnow().isoformat()
-    }
+    return last_data
 
 @app.post("/status")
 async def update_status(req: Request):
